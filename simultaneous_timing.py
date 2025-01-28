@@ -45,8 +45,9 @@ port = psrchive.Archive_load(portrait_file)
 port_wfreq = port.weighted_frequency(0,0,0)
 port_wfreq = port_wfreq*1e6
 #Attempt to remove the RM and see what changes
-port.set_rotation_measure(0)
+#port.set_rotation_measure(0)
 
+port.defaraday()
 #Also turn it so it has something to fit to
 port.rotate_phase(0.25)
 port.remove_baseline()
@@ -64,7 +65,7 @@ sV_template = port[3,j,:]/2
 
 
 #This should load all of the data into a single archive
-datas = psrchive.Archive_load('/fred/oz002/users/mmiles/MTM_trials/J0125-2327/rm_trials/data/J0125-2327_grand_T.dly_D_F_auxrm10')
+datas = psrchive.Archive_load('/fred/oz002/users/mmiles/MTM_trials/J0125-2327/rm_trials/data/J0125-2327_grand_T.dly_D_F_RM10')
 
 rm_approx = datas.get_rotation_measure()
 wfreq = datas.weighted_frequency(j,0,0)
@@ -261,7 +262,7 @@ data_fdm = np.concatenate((np.real(rfft_data), np.imag(rfft_data)))
 noise_fdm = noise*np.sqrt(len(data_fdm)/2)
 
 likelihood = bilby.likelihood.GaussianLikelihood(x, data_fdm,
-                                                avg_profile_model_fdm_fast_RM_QU_full_altfft)
+                                                avg_profile_model_fdm_fast_RM_QU_full)
 
 priors = dict()
 #priors['weak_amp'] = bilby.core.prior.Gaussian(mu=0.116654865, sigma=0.031803366, name='weak_amp')
@@ -283,7 +284,7 @@ priors['global_phase'] = bilby.core.prior.Uniform(-nbins/2, nbins/2,
                                                 'global_phase')
 priors['sigma'] = bilby.core.prior.Uniform(0, 10, name='sigma')
 
-outDir = 'simultaneous_timing_{0}_Fscrunched_RMdebug_portraitRM0_altfit_altpsi'.format(i)
+outDir = 'simultaneous_timing_{0}_Fscrunched_portCorrected_dataRM10'.format(i)
 
 results = bilby.core.sampler.run_sampler(
     likelihood, priors=priors, sampler='dynesty', label='dynesty',
